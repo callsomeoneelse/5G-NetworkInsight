@@ -95,10 +95,7 @@ Real-world 5G network measurements collected from **mobile testing trucks in Mel
 │   ├── cluster_map.png
 │   └── forecast_plot.png
 │
-├── read-datasets.py        # Merges raw CSVs into all_data.csv
-├── preprocessing.py        # Early exploration / Holt-Winters baseline
-├── telecom_code.py         # Full pipeline (clustering + LSTM)
-├── time_series.py          # Standalone LSTM training script
+├── read-datasets.py        # One-time script to merge raw CSVs into all_data.csv
 ├── UI.py                   # Interactive CLI — main entry point
 │
 ├── requirements.txt
