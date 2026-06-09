@@ -1,0 +1,3 @@
+.venv/
+data/all_data.csv
+birate_lstm_v2.keras

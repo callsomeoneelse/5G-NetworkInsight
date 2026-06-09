@@ -1,109 +1,184 @@
-**5G Network Performance Analysis and Forecasting**
----------------------------------------------------
+# 5G Network Performance Analysis & Forecasting
 
-### 📌 **Project Overview**
+![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.15+-orange?logo=tensorflow)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-blue?logo=scikitlearn)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-This project applies **machine learning techniques** to analyze and predict **5G network performance** across different geographical zones. The primary objectives include:
+A machine learning pipeline that analyses real-world **5G network performance data** collected from mobile testing trucks across **Melbourne, Australia**. The project combines **unsupervised clustering** to identify geographical network zones and **LSTM-based time-series forecasting** to predict future network conditions.
 
--   **Clustering geographical zones** based on network performance characteristics (e.g., throughput, latency).
--   **Predicting future network performance** using time-series forecasting to detect potential network bottlenecks.
+---
 
-By leveraging **KMeans clustering** and **LSTM-based time-series forecasting**, this project provides insights for **network engineers, telecom providers, and city planners** to optimize 5G infrastructure and enhance service quality.
+## 📋 Table of Contents
+- [Overview](#overview)
+- [Results](#results)
+- [Dataset](#dataset)
+- [Project Structure](#project-structure)
+- [Models](#models)
+- [Getting Started](#getting-started)
+- [Usage](#usage)
 
-* * * * *
+---
 
-🚀 **Features**
----------------
+## Overview
 
-✔ **Geographical Clustering**: Uses **KMeans** to categorize different network zones based on performance metrics.\
-✔ **Time-Series Forecasting**: Implements **LSTM (Long Short-Term Memory)** neural networks to predict future network conditions.\
-✔ **Performance Evaluation**: Analyzes network data for insights into **bottlenecks, service quality, and coverage gaps**.\
-✔ **Interactive Visualization**: Generates **clustering scatter plots and time-series prediction graphs**.
+This project addresses two core problems in 5G network analysis:
 
-* * * * *
+1. **Where do performance differences occur?** — KMeans clustering segments geographic zones by network behaviour, helping identify coverage gaps and high-demand areas.
+2. **What will performance look like next hour?** — An LSTM neural network trained on a 3600-second sliding window forecasts future bitrate, enabling proactive network management.
 
-📊 **Dataset**
---------------
+Target audience: network engineers, telecom providers, and city infrastructure planners.
 
-### **2.1 Data Source**
+---
 
-The dataset consists of **5G network performance data** collected from **mobile testing trucks** across various geographic zones. The key features include:
+## Results
 
--   **Time Data**: UNIX timestamp, datetime attributes (day, month, hour, etc.).
--   **Location Data**: GPS coordinates (`latitude`, `longitude`).
--   **Truck Information**: Truck ID, speed.
--   **Server Measurements**: Data from four different servers (`svr1`, `svr2`, `svr3`, `svr4`).
--   **Data Transfer Metrics**: `Transfer size`, `Bitrate`, `Retransmissions`, `CWnd` (congestion window).
--   **Receive Data**: Incoming transfer rates (`Transfer size-RX`, `Bitrate-RX`).
+### 🗺️ Geographical Clustering (k=5)
 
-This dataset enables **both clustering analysis and time-series forecasting** for enhanced network performance planning.
+KMeans clustering applied to 9 network performance features reveals 5 distinct zones across Melbourne's testing routes. The elbow method confirmed k=5 as the optimal number of clusters.
 
-* * * * *
+| Metric | Value |
+|--------|-------|
+| Number of Clusters | 5 |
+| Davies-Bouldin Index | 0.8847 |
+| Features Used | 9 |
 
-⚙️ **Data Processing**
-----------------------
+<p float="left">
+  <img src="outputs/elbow_plot.png" width="48%" alt="Elbow Method"/>
+  <img src="outputs/cluster_map.png" width="48%" alt="Cluster Map"/>
+</p>
 
-🔹 **Preprocessing Steps:**
+---
 
--   **Dropped missing and duplicate values** for data integrity.
--   **Filtered invalid GPS coordinates** (`99.999` values removed).
--   **Feature selection and engineering** to retain relevant columns.
--   **Standardized numerical values** using `StandardScaler` from `sklearn`.
--   **Created a `datetime` column** for easier time-series modeling.
--   **Applied a sliding time window** (1-hour) for forecasting.
+### 📈 LSTM Time-Series Forecasting
 
-* * * * *
+An LSTM network trained on 1-hour sliding windows of bitrate data to predict the next hour of network performance.
 
-📌 **Machine Learning Models**
-------------------------------
+| Metric | Value |
+|--------|-------|
+| Test MSE | 57.95 |
+| Test RMSE | 7.61 |
+| Window Size | 300 seconds (5 min) — 3600s recommended on GPU |
+| Epochs | 3 (CPU demo — more epochs recommended on GPU) |
+| Train / Val / Test Split | 80% / 10% / 10% |
 
-### 🏙 **1\. KMeans Clustering (Geographical Analysis)**
+<img src="outputs/forecast_plot.png" width="80%" alt="Forecast vs Actual"/>
 
--   **Goal**: Categorize different network zones based on performance metrics.
--   **Method**:
-    -   Used **Elbow Method** to determine the optimal number of clusters (`k`).
-    -   Applied `KMeans` clustering from `scikit-learn`.
-    -   Visualized clusters using **Matplotlib scatter plots**.
+---
 
-### 📈 **2\. LSTM Time-Series Forecasting (Predictive Analysis)**
+## Dataset
 
--   **Goal**: Predict **future network performance** using past trends.
--   **Model Architecture**:
-    -   **LSTM Layer** for sequential learning.
-    -   **Dense Layers** with ReLU activation.
-    -   **Adam Optimizer** with `learning_rate=0.0001`.
-    -   **Evaluation Metric**: Root Mean Square Error (**RMSE**).
--   **Training Setup**:
-    -   Train/Validation/Test Split: **80% / 10% / 10%**.
-    -   **Sliding Window Approach** (Uses 5 hours of past data to predict the next hour).
+Real-world 5G network measurements collected from **mobile testing trucks in Melbourne, Australia**.
 
-* * * * *
+| Feature Group | Columns |
+|---------------|---------|
+| Time | `Year`, `Month`, `day`, `hour`, `minute`, `second` |
+| Location | `latitude`, `longitude` |
+| Truck | Truck ID, speed |
+| Server metrics | `svr1`, `svr2`, `svr3`, `svr4` |
+| Transfer (TX) | `Transfer size`, `Bitrate`, `Retransmissions`, `CWnd` |
+| Transfer (RX) | `Transfer size-RX`, `Bitrate-RX` |
 
-📊 **Evaluation Metrics**
--------------------------
+> **Note:** The dataset (`all_data.csv`) is not included in this repository due to size. It is generated by running `read-datasets.py` against the raw CSV files in the `data/` directory.
 
-✅ **KMeans Clustering:**
+---
 
--   Evaluated using **Inertia Score** (sum of squared distances from each point to its cluster centroid).
--   The **elbow point** helps determine the best `k` value.
+## Project Structure
 
-✅ **LSTM Forecasting:**
+```
+5G-NetworkInsight/
+│
+├── data/                   # Raw CSV files (not tracked by git)
+│
+├── outputs/                # Generated plots saved here
+│   ├── elbow_plot.png
+│   ├── cluster_map.png
+│   └── forecast_plot.png
+│
+├── read-datasets.py        # Merges raw CSVs into all_data.csv
+├── preprocessing.py        # Early exploration / Holt-Winters baseline
+├── telecom_code.py         # Full pipeline (clustering + LSTM)
+├── time_series.py          # Standalone LSTM training script
+├── UI.py                   # Interactive CLI — main entry point
+│
+├── requirements.txt
+├── .gitignore
+└── README.md
+```
 
--   Evaluated using **Root Mean Square Error (RMSE)** to measure prediction accuracy.
--   **Lower RMSE** indicates **better forecasting performance**.
+---
 
-* * * * *
+## Models
 
-🖥 **AI Demonstrator**
-----------------------
+### KMeans Clustering
+- **Library:** scikit-learn
+- **Features:** `svr1`, `svr2`, `svr3`, `svr4`, `send_data`, `Transfer size`, `Bitrate`, `Transfer size-RX`, `Bitrate-RX`
+- **Preprocessing:** StandardScaler normalisation
+- **Evaluation:** Davies-Bouldin Index, Elbow Method (Inertia)
 
-### 🎯 **Clustering Visualization**
+### LSTM Forecasting
+- **Framework:** TensorFlow / Keras
+- **Architecture:**
+  ```
+  Input  → (3600, 1)
+  LSTM   → 64 units
+  Dense  → 8 units (ReLU)
+  Dense  → 1 unit  (Linear)
+  ```
+- **Optimiser:** Adam (lr=0.0001)
+- **Loss:** Mean Squared Error
+- **Metric:** Root Mean Squared Error (RMSE)
 
--   Takes **latitude, longitude**, and **network performance metrics** as input.
--   Generates **scatter plots** where **colors indicate cluster groups**.
+---
 
-### 📊 **Time-Series Forecasting Demo**
+## Getting Started
 
--   Takes a **chosen time window (e.g., 3600 seconds)** as input.
--   Uses the **LSTM model** to predict the **next hour's network performance**.
--   Produces **a time-series plot** comparing predictions vs. actual values.
+### Prerequisites
+- Python 3.10+
+- NVIDIA GPU recommended (see note below)
+
+### Installation
+
+```bash
+# Clone the repo
+git clone https://github.com/callsomeoneelse/5G-NetworkInsight.git
+cd 5G-NetworkInsight
+
+# Create and activate a virtual environment
+python -m venv venv
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # Linux / WSL2
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+> **GPU Note:** TensorFlow GPU support on Windows requires WSL2 (Ubuntu). Native Windows only supports CPU from TF 2.11+. See the [TensorFlow install guide](https://www.tensorflow.org/install) for details.
+
+### Prepare the data
+
+Place your raw `.csv` files in the `data/` directory, then run:
+
+```bash
+python read-datasets.py
+```
+
+This generates `all_data.csv` in the project root.
+
+---
+
+## Usage
+
+Run the interactive CLI:
+
+```bash
+python UI.py
+```
+
+You will be prompted to choose between:
+
+- **`cluster`** — runs the elbow method, lets you choose k, fits KMeans, and saves `cluster_map.png`
+- **`forecast`** — trains or loads an LSTM model and saves `forecast_plot.png`
+- **`exit`** — exits the program
+
+All plots are automatically saved to the `outputs/` directory.
